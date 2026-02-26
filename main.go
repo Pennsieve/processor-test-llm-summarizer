@@ -27,9 +27,15 @@ type LambdaEvent struct {
 	RefreshToken   string `json:"refreshToken"`
 }
 
+func isLambda() bool {
+	// AWS Lambda sets these env vars; check multiple for robustness
+	return os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" ||
+		os.Getenv("AWS_LAMBDA_RUNTIME_API") != "" ||
+		os.Getenv("_LAMBDA_SERVER_PORT") != ""
+}
+
 func main() {
-	// Detect Lambda runtime: AWS sets _LAMBDA_SERVER_PORT or AWS_LAMBDA_RUNTIME_API
-	if os.Getenv("AWS_LAMBDA_RUNTIME_API") != "" {
+	if isLambda() {
 		log.Println("Running as Lambda function")
 		lambda.Start(handleLambda)
 	} else {
