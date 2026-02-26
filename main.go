@@ -25,6 +25,7 @@ type LambdaEvent struct {
 	ComputeNodeID  string `json:"computeNodeId"`
 	SessionToken   string `json:"sessionToken"`
 	RefreshToken   string `json:"refreshToken"`
+	Model          string `json:"MODEL"`
 }
 
 func isLambda() bool {
@@ -51,6 +52,9 @@ func main() {
 func handleLambda(ctx context.Context, event LambdaEvent) error {
 	// Set EXECUTION_RUN_ID for the LLM SDK (it reads from env)
 	os.Setenv("EXECUTION_RUN_ID", event.ExecutionRunID)
+	if event.Model != "" {
+		os.Setenv("MODEL", event.Model)
+	}
 
 	runProcessor(event.InputDir, event.OutputDir, event.ExecutionRunID)
 	return nil
@@ -65,6 +69,13 @@ func runProcessor(inputDir, outputDir, executionRunID string) {
 
 	log.Printf("Input directory: %s", inputDir)
 	log.Printf("Output directory: %s", outputDir)
+
+	// Resolve model: use MODEL env/param, fall back to Sonnet 4.5
+	model := os.Getenv("MODEL")
+	if model == "" {
+		model = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+	}
+	log.Printf("Using model: %s", model)
 
 	// Initialize the LLM governor client
 	gov := llm.NewGovernor()
@@ -114,7 +125,7 @@ func runProcessor(inputDir, outputDir, executionRunID string) {
 4. Potential Uses: What this dataset could be used for`
 
 		resp, err := gov.Invoke(ctx, &llm.InvokeRequest{
-			Model:     llm.ModelHaiku45,
+			Model:     model,
 			System:    "You are a data analyst. Summarize datasets clearly and concisely. Use plain text paragraphs, not markdown.",
 			MaxTokens: 2048,
 			Messages: []llm.Message{
