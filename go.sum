@@ -32,5 +32,5 @@ github.com/aws/smithy-go v1.24.1 h1:VbyeNfmYkWoxMVpGUAbQumkODcYmfMRfZ8yQiH30SK0=
 github.com/aws/smithy-go v1.24.1/go.mod h1:LEj2LM3rBRQJxPZTB4KuzZkaZYnZPnvgIhb4pu07mx0=
 github.com/go-pdf/fpdf v0.9.0 h1:PPvSaUuo1iMi9KkaAn90NuKi+P4gwMedWPHhj8YlJQw=
 github.com/go-pdf/fpdf v0.9.0/go.mod h1:oO8N111TkmKb9D7VvWGLvLJlaZUQVPM+6V42pp3iV4Y=
-github.com/pennsieve/pennsieve-go-llm v0.0.1 h1:hGpMDBa/jGI/fKRBPEPvDo1apQWvcbD3qX4OeGjP4iI=
-github.com/pennsieve/pennsieve-go-llm v0.0.1/go.mod h1:j+5awd8chy10o1IzCBhhtIOV6EerWRlwpQWquWb92PQ=
+github.com/pennsieve/pennsieve-go-llm v0.0.2 h1:1bz4Hu4+BR4/8m7W/6yWNqUwaVYDujMtYiP2q8L0gLc=
+github.com/pennsieve/pennsieve-go-llm v0.0.2/go.mod h1:j+5awd8chy10o1IzCBhhtIOV6EerWRlwpQWquWb92PQ=

@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	github.com/go-pdf/fpdf v0.9.0
-	github.com/pennsieve/pennsieve-go-llm v0.0.1
+	github.com/pennsieve/pennsieve-go-llm v0.0.2
 )
 
 require (

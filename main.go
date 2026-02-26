@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -55,36 +56,34 @@ func main() {
 			log.Fatalf("Failed to read %s: %v", jsonFile, err)
 		}
 
-		// Parse JSON to verify it's valid and pretty-print for the prompt
+		// Validate JSON
 		var parsed interface{}
 		if err := json.Unmarshal(data, &parsed); err != nil {
 			log.Fatalf("Invalid JSON in %s: %v", jsonFile, err)
 		}
 
-		prettyJSON, err := json.MarshalIndent(parsed, "", "  ")
-		if err != nil {
-			log.Fatalf("Failed to format JSON: %v", err)
-		}
-
-		// Send to Bedrock via the governor
+		// Send JSON as a document block to Bedrock via the governor
 		log.Println("Sending to LLM for summarization...")
 
-		prompt := fmt.Sprintf(`The following JSON represents a dataset. Please provide a comprehensive summary that includes:
+		docName := strings.TrimSuffix(filepath.Base(jsonFile), filepath.Ext(jsonFile))
+		docB64 := base64.StdEncoding.EncodeToString(data)
 
-1. **Overview**: What this dataset contains and its purpose
-2. **Structure**: The key fields and their types
-3. **Content Summary**: A description of the data values and any patterns
-4. **Potential Uses**: What this dataset could be used for
+		prompt := `The attached JSON document represents a dataset. Please provide a comprehensive summary that includes:
 
-JSON content:
-%s`, string(prettyJSON))
+1. Overview: What this dataset contains and its purpose
+2. Structure: The key fields and their types
+3. Content Summary: A description of the data values and any patterns
+4. Potential Uses: What this dataset could be used for`
 
 		resp, err := gov.Invoke(ctx, &llm.InvokeRequest{
 			Model:     llm.ModelHaiku45,
 			System:    "You are a data analyst. Summarize datasets clearly and concisely. Use plain text paragraphs, not markdown.",
 			MaxTokens: 2048,
 			Messages: []llm.Message{
-				llm.UserMessage(llm.TextBlock(prompt)),
+				llm.UserMessage(
+					llm.DocumentBlock(docName, "txt", docB64),
+					llm.TextBlock(prompt),
+				),
 			},
 		})
 		if err != nil {
