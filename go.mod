@@ -3,6 +3,7 @@ module github.com/pennsieve/processor-test-llm-summarizer
 go 1.25.3
 
 require (
+	github.com/aws/aws-lambda-go v1.52.0
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/pennsieve/pennsieve-go-llm v0.0.2
 )

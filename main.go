@@ -11,18 +11,50 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/go-pdf/fpdf"
 	"github.com/pennsieve/pennsieve-go-llm/llm"
 )
 
+// LambdaEvent is the payload sent by the Step Functions orchestrator
+// when the processor runs as a Lambda function.
+type LambdaEvent struct {
+	InputDir       string `json:"inputDir"`
+	OutputDir      string `json:"outputDir"`
+	ExecutionRunID string `json:"executionRunId"`
+	ComputeNodeID  string `json:"computeNodeId"`
+	SessionToken   string `json:"sessionToken"`
+	RefreshToken   string `json:"refreshToken"`
+}
+
 func main() {
+	// Detect Lambda runtime: AWS sets _LAMBDA_SERVER_PORT or AWS_LAMBDA_RUNTIME_API
+	if os.Getenv("AWS_LAMBDA_RUNTIME_API") != "" {
+		log.Println("Running as Lambda function")
+		lambda.Start(handleLambda)
+	} else {
+		log.Println("Running as ECS task")
+		runProcessor(
+			os.Getenv("INPUT_DIR"),
+			os.Getenv("OUTPUT_DIR"),
+			os.Getenv("EXECUTION_RUN_ID"),
+		)
+	}
+}
+
+func handleLambda(ctx context.Context, event LambdaEvent) error {
+	// Set EXECUTION_RUN_ID for the LLM SDK (it reads from env)
+	os.Setenv("EXECUTION_RUN_ID", event.ExecutionRunID)
+
+	runProcessor(event.InputDir, event.OutputDir, event.ExecutionRunID)
+	return nil
+}
+
+func runProcessor(inputDir, outputDir, executionRunID string) {
 	log.Println("LLM Summarizer Processor starting")
 
-	inputDir := os.Getenv("INPUT_DIR")
-	outputDir := os.Getenv("OUTPUT_DIR")
-
 	if inputDir == "" || outputDir == "" {
-		log.Fatal("INPUT_DIR and OUTPUT_DIR environment variables are required")
+		log.Fatal("inputDir and outputDir are required")
 	}
 
 	log.Printf("Input directory: %s", inputDir)
