@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://schemas.pennsieve.io/app-manifest/v1.json
+application:
+  name: processor-test-llm-summarizer
+  description: Test processor for LLM access. Sends each JSON file in the input to Claude through the Pennsieve LLM governor for a plain-text summary and writes one PDF per file (<name>-summary.pdf).
+  type: processor
+  tags:
+    - utility
+    - llm
+
+runtime:
+  computeTypes:
+    - standard
+    - lambda
+  # Calls Claude through the Pennsieve LLM governor: LLM access is opt-in.
+  llm: true
+
+inputs:
+  - name: json
+    description: JSON files to summarize (only *.json at the top of the input directory are read).
+    mediaTypes:
+      - application/json
+
+outputs:
+  - name: summaries
+    description: One PDF summary per input JSON file, named <name>-summary.pdf.
+    mediaTypes:
+      - application/pdf
+
+parameters:
+  - name: MODEL
+    label: Model
+    description: Bedrock model ID the governor should call for the summaries.
+    type: string
+    defaultValue: anthropic.claude-sonnet-4-5-20250929-v1:0
